@@ -19,15 +19,15 @@ Download this repository as zip file and import it to the Arduino libraries.
 * Set WiFi SSID and password in the example .ino file
 * In the TwinCAT "Add Route Dialog" of the target machine you have to add the IP of this ESP.
 Make sure, that you have set the "Remote Route" to "None"
-<img src="https://github.com/otti/EspAdsLib/blob/main/pics/AddRoute.png" width="300">
+<img src="https://github.com/otti/EspAdsLib/blob/main/pics/AddRoute.png" width="500">
 
 ### Writing CoE Values
 Set the DestAmsAddr and the port in the code to the AmsAddr of the slave you want to access.
-<img src="https://github.com/otti/EspAdsLib/blob/main/pics/AmsNetId_CoE.png" width="300">
+<img src="https://github.com/otti/EspAdsLib/blob/main/pics/AmsNetId_CoE.png" width="450">
 
 ### Writing PLC variables
 Set the DestAmsAddr in the code to the AmsAddr of the master. This usually ends with `.1.1`
-Set the Port to the port of your PLC. The first PLC usually has port 851 on TwinCAT3 and 801 on TwinCAT2.
+Set the port to the port of your PLC. The first PLC usually has port 851 on TwinCAT3 and 801 on TwinCAT2.
 The port is also available as define. (`AMSPORT_R0_PLC_TC3`)
 
 ## Limitations
