@@ -163,7 +163,39 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 // ADS Return codes
-#define ADSERR_NOERR                        0x00
+#define ADSERR_NOERROR               0x00 // No error.
+#define ADSERR_INTERNAL              0x01 // Internal error.
+#define ADSERR_NORTIME               0x02 // No real-time.
+#define ADSERR_ALLOCLOCKEDMEM        0x03 // Allocation locked – memory error.
+#define ADSERR_INSERTMAILBOX         0x04 // Mailbox full – the ADS message could not be sent. Reducing the number of ADS messages per cycle will help.
+#define ADSERR_WRONGRECEIVEHMSG      0x05 // Wrong HMSG.
+#define ADSERR_TARGETPORTNOTFOUND    0x06 // Target port not found – ADS server is not started or is not reachable.
+#define ADSERR_TARGETMACHINENOTFOUND 0x07 // Target computer not found – AMS route was not found.
+#define ADSERR_UNKNOWNCMDID          0x08 // Unknown command ID.
+#define ADSERR_BADTASKID             0x09 // Invalid task ID.
+#define ADSERR_NOIO                  0x0A // No IO.
+#define ADSERR_UNKNOWNAMSCMD         0x0B // Unknown AMS command.
+#define ADSERR_WIN32ERROR            0x0C // Win32 error.
+#define ADSERR_PORTNOTCONNECTED      0x0D // Port not connected.
+#define ADSERR_INVALIDAMSLENGTH      0x0E // Invalid AMS length.
+#define ADSERR_INVALIDAMSNETID       0x0F // Invalid AMS Net ID.
+#define ADSERR_LOWINSTLEVEL          0x10 // Installation level is too low –TwinCAT 2 license error.
+#define ADSERR_NODEBUGINTAVAILABLE   0x11 // No debugging available.
+#define ADSERR_PORTDISABLED          0x12 // Port disabled – TwinCAT system service not started.
+#define ADSERR_PORTALREADYCONNECTED  0x13 // Port already connected.
+#define ADSERR_AMSSYNC_W32ERROR      0x14 // AMS Sync Win32 error.
+#define ADSERR_AMSSYNC_TIMEOUT       0x15 // AMS Sync Timeout.
+#define ADSERR_AMSSYNC_AMSERROR      0x16 // AMS Sync error.
+#define ADSERR_AMSSYNC_NOINDEXINMAP  0x17 // No index map for AMS Sync available.
+#define ADSERR_INVALIDAMSPORT        0x18 // Invalid AMS port.
+#define ADSERR_NOMEMORY              0x19 // No memory.
+#define ADSERR_TCPSEND               0x1A // TCP send error.
+#define ADSERR_HOSTUNREACHABLE       0x1B // Host unreachable.
+#define ADSERR_INVALIDAMSFRAGMENT    0x1C // Invalid AMS fragment.
+#define ADSERR_TLSSEND               0x1D // TLS send error – secure ADS connection failed.
+#define ADSERR_ACCESSDENIED          0x1E // Access denied – secure ADS access denied.
+
+
 #define ERR_ADSERRS                         0x0700
 
 #define ADSERR_DEVICE_ERROR                 (0x00 + ERR_ADSERRS) /**< Error class < device error > */
@@ -217,7 +249,7 @@
 
 #define ADSERR_CLIENT_ERROR                 (0x40 + ERR_ADSERRS) /**< Error class < client error > */
 #define ADSERR_CLIENT_INVALIDPARM           (0x41 + ERR_ADSERRS) /**< invalid parameter at service call */
-#define ADSERR_CLIENT_LISTEMPTY             (0x42 + ERR_ADSERRS) /**< polling list	is empty */
+#define ADSERR_CLIENT_LISTEMPTY             (0x42 + ERR_ADSERRS) /**< polling list is empty */
 #define ADSERR_CLIENT_VARUSED               (0x43 + ERR_ADSERRS) /**< var connection already in use */
 #define ADSERR_CLIENT_DUPLINVOKEID          (0x44 + ERR_ADSERRS) /**< invoke id in use */
 #define ADSERR_CLIENT_SYNCTIMEOUT           (0x45 + ERR_ADSERRS) /**< timeout elapsed -> Check ADS routes of sender and receiver and your [firewall setting](http://infosys.beckhoff.com/content/1033/tcremoteaccess/html/tcremoteaccess_firewall.html?id=12027) */
