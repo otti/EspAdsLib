@@ -235,7 +235,7 @@ uint32_t ADS::Ads::Write(uint32_t u32IdxGrp, uint32_t u32IdxOffset, size_t WrLen
             ADS_DEBUG_PRINTLN(">>> AdsWrite: Client Timeout !");
             ADS_DEBUG_PRINTLN(">>> Check your ADS router settings and your SrcNetId and DestNetId");
             this->client.stop();
-            return 0;
+            return ADSERR_DEVICE_TIMEOUT;
         }
     }
 
@@ -282,7 +282,7 @@ uint32_t ADS::Ads::Read(uint32_t u32IdxGrp, uint32_t u32IdxOffset, size_t RdLen,
         {
             ADS_DEBUG_PRINTLN(">>>AdsRead:  Client Timeout !");
             ADS_DEBUG_PRINTLN(">>> Check your ADS router settings and your SrcNetId and DestNetId");
-            return 0;
+            return ADSERR_DEVICE_TIMEOUT;
         }
     }
 
@@ -335,7 +335,7 @@ uint32_t ADS::Ads::ReadWrite(uint32_t u32IdxGrp, uint32_t u32IdxOffset, size_t R
             ADS_DEBUG_PRINTLN(">>> AdsReadWrite: Client Timeout !");
             ADS_DEBUG_PRINTLN(">>> Check your ADS router settings and your SrcNetId and DestNetId");
             client.stop();
-            return 0;
+            return ADSERR_DEVICE_TIMEOUT;
         }
     }
 
@@ -369,9 +369,6 @@ uint32_t ADS::Ads::WritePlcVarByName(char* VarName, void* pWrData, size_t WrLen)
     // ----------------------------------------------------
     u32AdsRetVal = this->Write(ADSIGRP_SYM_VALBYHND, u32VarHandle, WrLen, pWrData);
 
-    if (u32AdsRetVal)
-        return u32AdsRetVal;
-
     return u32AdsRetVal;
 }
 
@@ -397,9 +394,6 @@ uint32_t ADS::Ads::ReadPlcVarByName(char* VarName, void* pRdData, size_t RdLen)
 
     memcpy(pRdData, ReadResponse.Data, RdLen);
 
-    if (u32AdsRetVal)
-        return u32AdsRetVal;
-
     return u32AdsRetVal;
 }
 
@@ -418,7 +412,7 @@ uint32_t ADS::Ads::ReadCoe(uint16_t u16Index, uint8_t u8Subindex, bool bComplete
     {
         u32IdxOffset |= 0x100;
         if (u8Subindex > 1) // only 0 and 1 allowed for CA
-            return 0;
+            return ADSERR_DEVICE_INVALIDPARM;
     }
 
     u32AdsRetVal = this->Read(IDX_GRP_RW_COE, u32IdxOffset, RdLen, &ReadResponse);
@@ -435,7 +429,7 @@ uint32_t ADS::Ads::WriteCoe(uint16_t u16Index, uint8_t u8Subindex, bool bComplet
     {
         u32IdxOffset |= 0x100;
         if (u8Subindex > 1) // only 0 and 1 allowed for CA
-            return 0;
+            return ADSERR_DEVICE_INVALIDPARM;
     }
 
     return this->Write(IDX_GRP_RW_COE, u32IdxOffset, WrLen, pWrData);
