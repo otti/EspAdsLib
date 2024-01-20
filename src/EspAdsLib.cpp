@@ -348,14 +348,14 @@ uint32_t ADS::Ads::ReadWrite(uint32_t u32IdxGrp, uint32_t u32IdxOffset, size_t R
     return AmsReceivePacket.ReadWriteResponse.u32Result;
 }
 
-uint32_t ADS::Ads::GetVaraibleHandleByName(std::string VarName, uint32_t* u32VarHandle)
+uint32_t ADS::Ads::GetVaraibleHandleByName(std::string VarName, ADS::HANDLE &Handle)
 {
     sADS_RESP_READ_t ReadResponse;
     uint32_t u32AdsRetVal;
 
-    this->ReadWrite(ADSIGRP_SYM_HNDBYNAME, 0, sizeof(u32VarHandle), VarName.size(), (void*)VarName.c_str(), &ReadResponse);
+    this->ReadWrite(ADSIGRP_SYM_HNDBYNAME, 0, sizeof(ADS::HANDLE), VarName.size(), (void*)VarName.c_str(), &ReadResponse);
     u32AdsRetVal = ReadResponse.u32Result;
-    memcpy(u32VarHandle, ReadResponse.Data, sizeof(uint32_t));
+    memcpy(&Handle, ReadResponse.Data, sizeof(ADS::HANDLE));
 
     return u32AdsRetVal;
 }
@@ -363,18 +363,18 @@ uint32_t ADS::Ads::GetVaraibleHandleByName(std::string VarName, uint32_t* u32Var
 uint32_t ADS::Ads::WritePlcVarByName(std::string VarName, void* pWrData, size_t WrLen)
 {
     sADS_RESP_READ_t ReadResponse;
-    uint32_t u32VarHandle;
+    ADS::HANDLE Handle;
     uint32_t u32AdsRetVal;
 
     ADS_DEBUG_PRINTLN("ADS WritePlcVarByName");
 
-    u32AdsRetVal = this->GetVaraibleHandleByName(VarName, &u32VarHandle);
+    u32AdsRetVal = this->GetVaraibleHandleByName(VarName, Handle);
     if (u32AdsRetVal)
         return u32AdsRetVal;
 
     // Write Var
     // ----------------------------------------------------
-    u32AdsRetVal = this->Write(ADSIGRP_SYM_VALBYHND, u32VarHandle, WrLen, pWrData);
+    u32AdsRetVal = this->Write(ADSIGRP_SYM_VALBYHND, Handle, WrLen, pWrData);
 
     return u32AdsRetVal;
 }
@@ -382,17 +382,17 @@ uint32_t ADS::Ads::WritePlcVarByName(std::string VarName, void* pWrData, size_t 
 uint32_t ADS::Ads::ReadPlcVarByName(std::string VarName, void* pRdData, size_t RdLen)
 {
     sADS_RESP_READ_t ReadResponse;
-    uint32_t u32VarHandle;
+    ADS::HANDLE Handle;
     uint32_t u32AdsRetVal;
 
     ADS_DEBUG_PRINTLN("ADS ReadPlcVarByName");
 
-    u32AdsRetVal = this->GetVaraibleHandleByName(VarName, &u32VarHandle);
+    u32AdsRetVal = this->GetVaraibleHandleByName(VarName, Handle);
     if (u32AdsRetVal)
         return u32AdsRetVal;
 
     // Read Var
-    u32AdsRetVal = this->Read(ADSIGRP_SYM_VALBYHND, u32VarHandle, RdLen, &ReadResponse);
+    u32AdsRetVal = this->Read(ADSIGRP_SYM_VALBYHND, Handle, RdLen, &ReadResponse);
 
     memcpy(pRdData, ReadResponse.Data, RdLen);
 

@@ -69,13 +69,14 @@ class Ads
     uint32_t Read(uint32_t u32IdxGrp, uint32_t u32IdxOffset, size_t RdLen, sADS_RESP_READ_t* Response);
     uint32_t Write(uint32_t u32IdxGrp, uint32_t u32IdxOffset, size_t WrLen, void* pData);
     uint32_t ReadWrite(uint32_t u32IdxGrp, uint32_t u32IdxOffset, size_t RdLen, size_t WrLen, void* pWrData, sADS_RESP_READ_t* Response);
-    uint32_t GetVaraibleHandleByName(std::string VarName, uint32_t* u32VarHandle);
+    uint32_t GetVaraibleHandleByName(std::string VarName, HANDLE &u32VarHandle);
     uint32_t WritePlcVarByName(std::string VarName, void* pWrData, size_t WrLen);
     uint32_t ReadPlcVarByName(std::string VarName, void* pRdData, size_t RdLen);
     uint32_t ReadCoe(uint16_t u16Index, uint8_t u8Subindex, size_t RdLen, void* pRdData);
     uint32_t ReadCoe(uint16_t u16Index, uint8_t u8Subindex, bool bCompleteAccess, size_t RdLen, void* pRdData);
     uint32_t WriteCoe(uint16_t u16Index, uint8_t u8Subindex, size_t WrLen, void* pWrData);
     uint32_t WriteCoe(uint16_t u16Index, uint8_t u8Subindex, bool bCompleteAccess, size_t WrLen, void* pWrData);
+    uint32_t AddDeviceNotification(int32_t u32IdxGrp, uint32_t u32IdxOffset, uint32_t u32Len, eTransMode TransMode, uint32_t u32MaxDelay, uint32_t u32CycleTime, HANDLE &Handle);
 #if ADS_DEBUG_PRINT_ENABLE == 1
     void DebugPrintHex(void* pData, size_t Len);
 #endif
