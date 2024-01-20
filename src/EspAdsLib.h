@@ -26,6 +26,9 @@
 
 namespace ADS
 {
+
+typedef uint32_t HANDLE;
+
 enum ADS_LIB_ERR
 {
     NO_ERR = 0,

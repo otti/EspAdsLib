@@ -441,3 +441,28 @@ uint32_t ADS::Ads::WriteCoe(uint16_t u16Index, uint8_t u8Subindex, size_t WrLen,
 {
     return this->WriteCoe(u16Index, u8Subindex, false, WrLen, pWrData);
 }
+
+// completely untested!!!
+uint32_t ADS::Ads::AddDeviceNotification(int32_t u32IdxGrp, uint32_t u32IdxOffset, uint32_t u32Len, eTransMode TransMode, uint32_t u32MaxDelay, uint32_t u32CycleTime, ADS::HANDLE &Handle)
+{
+    sADS_REQ_ADD_NOTIFICATION_t AddNoti;
+    sADS_RESP_READ_t ReadResponse;
+    uint32_t u32AdsRetVal;
+
+    AddNoti.u32Length     = u32Len;
+    AddNoti.u32TransMode  = TransMode;
+    AddNoti.u32MaxDelay   = u32MaxDelay;
+    AddNoti.u32CycleTime  = u32CycleTime;
+
+    this->ReadWrite(u32IdxGrp, u32IdxOffset, sizeof(ADS::HANDLE), sizeof(AddNoti), (void*)&AddNoti, &ReadResponse);
+    u32AdsRetVal = ReadResponse.u32Result;
+    memcpy(&Handle, ReadResponse.Data, sizeof(ADS::HANDLE));
+
+    return u32AdsRetVal;
+}
+
+// completely untested!!!
+uint32_t ADS::Ads::DeleteDeviceNotification(int32_t u32IdxGrp, uint32_t u32IdxOffset, ADS::HANDLE Handle)
+{
+    this->Write(u32IdxGrp, u32IdxOffset, sizeof(ADS::HANDLE), (void*)&Handle);
+}

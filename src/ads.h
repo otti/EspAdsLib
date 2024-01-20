@@ -91,18 +91,24 @@ typedef struct __attribute__((__packed__))
    };
 }sAMS_PACKET_t;
 
-
-enum ADSTRANSMODE {
-    ADSTRANS_NOTRANS      = 0,
-    ADSTRANS_CLIENTCYCLE  = 1,
-    ADSTRANS_CLIENTONCHA  = 2,
-    ADSTRANS_SERVERCYCLE  = 3,
-    ADSTRANS_SERVERONCHA  = 4,
-    ADSTRANS_SERVERCYCLE2 = 5,
-    ADSTRANS_SERVERONCHA2 = 6,
-    ADSTRANS_CLIENT1REQ   = 10,
-    ADSTRANS_MAXMODES
+enum class eTransMode : uint32_t
+{
+    None              = 0, // No AdsNotification event is fired.
+    ClientCycle       = 1, // Client triggered cyclic AdsNotification event
+    ClientOnChange    = 2, // The AdsNotification event is fired when data changes triggered by the client
+    Cyclic            = 3, // The AdsNotification event is fired cyclically.
+    OnChange          = 4, // The Notification will be registered on the ADS Server side for an on-change and optional cyclical trigger 
+    CyclicInContext   = 5, // The AdsNotification event is fired cyclically within the given task context
+    OnChangeInContext = 6  // The AdsNotification event is fired when the data changes within the given task context
 };
+
+typedef struct __attribute__((__packed__)) 
+{
+   uint32_t   u32Length;     // Length of data in bytes, which should be sent per notification.
+   eTransMode u32TransMode;
+   uint32_t   u32MaxDelay;	  // At the latest after this time, the ADS Device Notification is called. The unit is 1ms.
+   uint32_t   u32CycleTime;  // The ADS server checks if the value changes in this time slice. The unit is 1ms
+}sADS_REQ_ADD_NOTIFICATION_t;
 
 enum ADSSTATE {
     ADSSTATE_INVALID      = 0,
