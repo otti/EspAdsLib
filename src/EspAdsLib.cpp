@@ -464,5 +464,5 @@ uint32_t ADS::Ads::AddDeviceNotification(int32_t u32IdxGrp, uint32_t u32IdxOffse
 // completely untested!!!
 uint32_t ADS::Ads::DeleteDeviceNotification(int32_t u32IdxGrp, uint32_t u32IdxOffset, ADS::HANDLE Handle)
 {
-    this->Write(u32IdxGrp, u32IdxOffset, sizeof(ADS::HANDLE), (void*)&Handle);
+    return this->Write(u32IdxGrp, u32IdxOffset, sizeof(ADS::HANDLE), (void*)&Handle);
 }

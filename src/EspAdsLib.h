@@ -80,6 +80,7 @@ class Ads
     uint32_t WriteCoe(uint16_t u16Index, uint8_t u8Subindex, size_t WrLen, void* pWrData);
     uint32_t WriteCoe(uint16_t u16Index, uint8_t u8Subindex, bool bCompleteAccess, size_t WrLen, void* pWrData);
     uint32_t AddDeviceNotification(int32_t u32IdxGrp, uint32_t u32IdxOffset, uint32_t u32Len, eTransMode TransMode, uint32_t u32MaxDelay, uint32_t u32CycleTime, HANDLE &Handle);
+    uint32_t DeleteDeviceNotification(int32_t u32IdxGrp, uint32_t u32IdxOffset, HANDLE Handle);
 #if ADS_DEBUG_PRINT_ENABLE == 1
     void DebugPrintHex(void* pData, size_t Len);
 #endif
