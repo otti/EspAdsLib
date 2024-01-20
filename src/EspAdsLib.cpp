@@ -348,7 +348,7 @@ uint32_t ADS::Ads::ReadWrite(uint32_t u32IdxGrp, uint32_t u32IdxOffset, size_t R
     return AmsReceivePacket.ReadWriteResponse.u32Result;
 }
 
-uint32_t ADS::Ads::WritePlcVarByName(char* VarName, void* pWrData, size_t WrLen)
+uint32_t ADS::Ads::WritePlcVarByName(std::string VarName, void* pWrData, size_t WrLen)
 {
     sADS_RESP_READ_t ReadResponse;
     uint32_t u32VarHandle;
@@ -358,7 +358,7 @@ uint32_t ADS::Ads::WritePlcVarByName(char* VarName, void* pWrData, size_t WrLen)
 
     // Get Var handle
     // ----------------------------------------------------
-    this->ReadWrite(ADSIGRP_SYM_HNDBYNAME, 0, sizeof(u32VarHandle), strlen(VarName), VarName, &ReadResponse);
+    this->ReadWrite(ADSIGRP_SYM_HNDBYNAME, 0, sizeof(u32VarHandle), VarName.size(), (void*)VarName.c_str(), &ReadResponse);
     u32AdsRetVal = ReadResponse.u32Result;
     memcpy(&u32VarHandle, ReadResponse.Data, sizeof(u32VarHandle));
 
@@ -372,7 +372,7 @@ uint32_t ADS::Ads::WritePlcVarByName(char* VarName, void* pWrData, size_t WrLen)
     return u32AdsRetVal;
 }
 
-uint32_t ADS::Ads::ReadPlcVarByName(char* VarName, void* pRdData, size_t RdLen)
+uint32_t ADS::Ads::ReadPlcVarByName(std::string VarName, void* pRdData, size_t RdLen)
 {
     sADS_RESP_READ_t ReadResponse;
     uint32_t u32VarHandle;
@@ -382,7 +382,7 @@ uint32_t ADS::Ads::ReadPlcVarByName(char* VarName, void* pRdData, size_t RdLen)
 
     // Get Var handle
     // ----------------------------------------------------
-    this->ReadWrite(ADSIGRP_SYM_HNDBYNAME, 0, sizeof(u32VarHandle), strlen(VarName), VarName, &ReadResponse);
+    this->ReadWrite(ADSIGRP_SYM_HNDBYNAME, 0, sizeof(u32VarHandle), VarName.size(), (void*)VarName.c_str(), &ReadResponse);
     u32AdsRetVal = ReadResponse.u32Result;
     memcpy(&u32VarHandle, ReadResponse.Data, sizeof(u32VarHandle));
 
