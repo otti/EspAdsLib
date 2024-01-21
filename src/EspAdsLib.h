@@ -67,6 +67,8 @@ class Ads
 
   public:
     Ads(AmsAddr* SrcAddr, AmsAddr* DestAddr, char* DestIp);
+    Ads();
+    void SetAddr(AmsAddr* SrcAddr, AmsAddr* DestAddr, char* DestIp);
     bool Connect(void);
     void Disconnect(void);
     uint32_t Read(uint32_t u32IdxGrp, uint32_t u32IdxOffset, size_t RdLen, sADS_RESP_READ_t* Response);

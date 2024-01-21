@@ -170,6 +170,19 @@ ADS::Ads::Ads(AmsAddr* SrcAddr, AmsAddr* DestAddr, char* DestIp)
     strncpy(this->DestIp, DestIp, sizeof(this->DestIp) - 1); // Minus terminating zero
 }
 
+ADS::Ads::Ads()
+{
+    this->u16AdsPort = ADS_TCP_SERVER_PORT;
+    this->u32InvokeId = 1;
+}
+
+void ADS::Ads::SetAddr(AmsAddr* SrcAddr, AmsAddr* DestAddr, char* DestIp)
+{
+    this->pAmsSrcAddr = SrcAddr;
+    this->pAmsDestAddr = DestAddr;
+    strncpy(this->DestIp, DestIp, sizeof(this->DestIp) - 1); // Minus terminating zero  
+}
+
 bool ADS::Ads::Connect(void)
 {
     ADS_DEBUG_PRINT("ADS connection to ");
