@@ -12,7 +12,7 @@
 #include "ads.h"
 
 #ifndef ADS_DEBUG_PRINT_ENABLE
-#define ADS_DEBUG_PRINT_ENABLE 0
+#define ADS_DEBUG_PRINT_ENABLE 1
 #endif
 
 #if ADS_DEBUG_PRINT_ENABLE == 1
@@ -23,6 +23,8 @@
     #define ADS_DEBUG_PRINT(s) ;
     #define ADS_DEBUG_PRINTLN(s) ;
 #endif
+
+#define ADS_MAX_NO_OF_NOTIFICATIONS 10
 
 namespace ADS
 {
@@ -58,12 +60,22 @@ class AmsAddr
 class Ads
 {
   private:
+
+    typedef struct
+    {
+      ADS::HANDLE Handle;
+      void (*pCallback)(void* pData, size_t Len);
+    }sCallback_t;
+
     AmsAddr* pAmsSrcAddr;
     AmsAddr* pAmsDestAddr;
     uint32_t u32InvokeId;
     char DestIp[16];
     WiFiClient client;
     uint16_t u16AdsPort;
+    sCallback_t aCallback[ADS_MAX_NO_OF_NOTIFICATIONS];
+    
+    sCallback_t* GetHandle(void);
 
   public:
     Ads(AmsAddr* SrcAddr, AmsAddr* DestAddr, char* DestIp);
@@ -71,8 +83,10 @@ class Ads
     void SetAddr(AmsAddr* SrcAddr, AmsAddr* DestAddr, char* DestIp);
     bool Connect(void);
     void Disconnect(void);
+    void loop(void);
     uint32_t Read(uint32_t u32IdxGrp, uint32_t u32IdxOffset, size_t RdLen, sADS_RESP_READ_t* Response);
-    uint32_t Write(uint32_t u32IdxGrp, uint32_t u32IdxOffset, size_t WrLen, void* pData);
+    //uint32_t Write(uint32_t u32IdxGrp, uint32_t u32IdxOffset, size_t WrLen, void* pData);
+    uint32_t Write(uint32_t u32IdxGrp, uint32_t u32IdxOffset, size_t WrLen, void* pWrData, size_t RdLen=0, void* pRdData = nullptr);
     uint32_t ReadWrite(uint32_t u32IdxGrp, uint32_t u32IdxOffset, size_t RdLen, size_t WrLen, void* pWrData, sADS_RESP_READ_t* Response);
     uint32_t GetVaraibleHandleByName(std::string VarName, HANDLE &u32VarHandle);
     uint32_t WritePlcVarByName(std::string VarName, void* pWrData, size_t WrLen);
@@ -81,7 +95,8 @@ class Ads
     uint32_t ReadCoe(uint16_t u16Index, uint8_t u8Subindex, bool bCompleteAccess, size_t RdLen, void* pRdData);
     uint32_t WriteCoe(uint16_t u16Index, uint8_t u8Subindex, size_t WrLen, void* pWrData);
     uint32_t WriteCoe(uint16_t u16Index, uint8_t u8Subindex, bool bCompleteAccess, size_t WrLen, void* pWrData);
-    uint32_t AddDeviceNotification(int32_t u32IdxGrp, uint32_t u32IdxOffset, uint32_t u32Len, eTransMode TransMode, uint32_t u32MaxDelay, uint32_t u32CycleTime, HANDLE &Handle);
+    uint32_t AddDeviceNotification(int32_t u32IdxGrp, uint32_t u32IdxOffset, uint32_t u32Len, eTransMode TransMode, uint32_t u32MaxDelay, uint32_t u32CycleTime, void (*Callback)(void*, size_t));
+    uint32_t AddDeviceNotificationByName(std::string VarName, size_t VarSize, uint32_t u32MaxDelay, uint32_t u32CycleTime, void (*Callback)(void*, size_t));
     uint32_t DeleteDeviceNotification(int32_t u32IdxGrp, uint32_t u32IdxOffset, HANDLE Handle);
 #if ADS_DEBUG_PRINT_ENABLE == 1
     void DebugPrintHex(void* pData, size_t Len);

@@ -168,12 +168,14 @@ ADS::Ads::Ads(AmsAddr* SrcAddr, AmsAddr* DestAddr, char* DestIp)
     this->u16AdsPort = ADS_TCP_SERVER_PORT;
     this->u32InvokeId = 1;
     strncpy(this->DestIp, DestIp, sizeof(this->DestIp) - 1); // Minus terminating zero
+    memset(this->aCallback, 0, sizeof(this->aCallback));
 }
 
 ADS::Ads::Ads()
 {
     this->u16AdsPort = ADS_TCP_SERVER_PORT;
     this->u32InvokeId = 1;
+    memset(this->aCallback, 0, sizeof(this->aCallback));
 }
 
 void ADS::Ads::SetAddr(AmsAddr* SrcAddr, AmsAddr* DestAddr, char* DestIp)
@@ -209,10 +211,56 @@ void ADS::Ads::Disconnect(void)
     this->client.stop();
 }
 
-uint32_t ADS::Ads::Write(uint32_t u32IdxGrp, uint32_t u32IdxOffset, size_t WrLen, void* pData)
+void ADS::Ads::loop(void)
+{
+    uint32_t u32Len;
+    uint32_t u32NoOfStamps;
+
+    uint64_t u64TimeStamp;
+    uint32_t u32Samples;
+
+    ADS::HANDLE Handle;
+    uint32_t u32SampleSize;
+
+    uint8_t u8Dummy;
+
+    if( client.available() ) // new data received
+    {
+        // must be a ADS notifiction packet
+        client.readBytes((uint8_t*)&u32Len,        sizeof(u32Len));
+        client.readBytes((uint8_t*)&u32NoOfStamps, sizeof(u32NoOfStamps));
+
+        while(u32NoOfStamps--)
+        {
+            client.readBytes((uint8_t*)&u64TimeStamp, sizeof(u64TimeStamp));
+            client.readBytes((uint8_t*)&u32Samples,   sizeof(u32Samples));
+
+            while(u32Samples--)
+            {
+                client.readBytes((uint8_t*)&Handle, sizeof(Handle));
+                client.readBytes((uint8_t*)&u32SampleSize, sizeof(u32SampleSize));
+
+                while(u32SampleSize--)
+                {
+                    client.readBytes((uint8_t*)&u8Dummy, sizeof(u8Dummy));
+                }
+            }
+        }
+
+    }
+    
+}
+
+//uint32_t ADS::Ads::Write(uint32_t u32IdxGrp, uint32_t u32IdxOffset, size_t WrLen, void* pWrData)
+//{
+//    return this->Write(u32IdxGrp, u32IdxOffset, WrLen, pData, sizeof())
+//}
+
+uint32_t ADS::Ads::Write(uint32_t u32IdxGrp, uint32_t u32IdxOffset, size_t WrLen, void* pWrData, size_t RdLen, void* pRdData)
 {
     sAMS_PACKET_t AmsSendPacket;
     sAMS_PACKET_t AmsReceivePacket;
+    uint32_t u32RdLen;
 
     ADS_DEBUG_PRINTLN("ADS Write");
 
@@ -229,7 +277,7 @@ uint32_t ADS::Ads::Write(uint32_t u32IdxGrp, uint32_t u32IdxOffset, size_t WrLen
     AmsSendPacket.WriteRequest.u32IndexOffset = u32IdxOffset;
     AmsSendPacket.WriteRequest.u32Length = WrLen;
 
-    memcpy(AmsSendPacket.WriteRequest.Data, pData, WrLen);
+    memcpy(AmsSendPacket.WriteRequest.Data, pWrData, WrLen);
 
     AmsSendPacket.TmsTcpHeader.reserved = 0;
     AmsSendPacket.TmsTcpHeader.u32Length = SIZEOF_AMS_HEADER + sizeof(sADS_REQ_WRITE_t) - ADS_MAX_DATA_SIZE + WrLen;
@@ -252,13 +300,20 @@ uint32_t ADS::Ads::Write(uint32_t u32IdxGrp, uint32_t u32IdxOffset, size_t WrLen
         }
     }
 
+
+    u32RdLen = this->client.read((uint8_t*)&AmsReceivePacket, sizeof(AmsReceivePacket));
+    if( pRdData != nullptr ) // This is not a standard write request with 4 byte result
+    {
+        memcpy(pRdData, &AmsReceivePacket.u32Result, RdLen);
+    }
+
     // Read AmsResponse
-    if ((this->client.read((uint8_t*)&AmsReceivePacket, sizeof(AmsReceivePacket))) <= 0)
+    if( u32RdLen<= 0 )
         ADS_DEBUG_PRINTLN("AdsWrite: ERROR reading from socket");
 
-    ADS_DEBUG_PRINTLN("ADS Write Response: " + String(AmsReceivePacket.u32WrResponse))
+    ADS_DEBUG_PRINTLN("ADS Write Response: " + String(AmsReceivePacket.u32Result))
 
-    return AmsReceivePacket.u32WrResponse;
+    return AmsReceivePacket.u32Result;
 }
 
 uint32_t ADS::Ads::Read(uint32_t u32IdxGrp, uint32_t u32IdxOffset, size_t RdLen, sADS_RESP_READ_t* Response)
@@ -455,23 +510,58 @@ uint32_t ADS::Ads::WriteCoe(uint16_t u16Index, uint8_t u8Subindex, size_t WrLen,
     return this->WriteCoe(u16Index, u8Subindex, false, WrLen, pWrData);
 }
 
+ADS::Ads::sCallback_t* ADS::Ads::GetHandle(void)
+{
+    for( int i=0; i<ADS_MAX_NO_OF_NOTIFICATIONS; i++ )
+    {
+        if( this->aCallback[i].pCallback == nullptr )
+        {
+            return &aCallback[i];
+        }
+    }
+
+    return (ADS::Ads::sCallback_t*)nullptr;
+}
+
+
+uint32_t ADS::Ads::AddDeviceNotificationByName(std::string VarName, size_t VarSize, uint32_t u32MaxDelay, uint32_t u32CycleTime, void (*Callback)(void*, size_t))
+{
+    ADS::HANDLE Handle;
+    uint32_t u32AdsRetVal;
+
+    ADS_DEBUG_PRINTLN("ADS AddDeviceNotificationByName");
+
+    u32AdsRetVal = this->GetVaraibleHandleByName(VarName, Handle);
+    if (u32AdsRetVal)
+        return u32AdsRetVal;
+
+    return this->AddDeviceNotification(ADSIGRP_SYMNOTE, Handle, (uint32_t)VarSize, eTransMode::OnChange, u32MaxDelay, u32CycleTime, Callback);
+}
+
 // completely untested!!!
-uint32_t ADS::Ads::AddDeviceNotification(int32_t u32IdxGrp, uint32_t u32IdxOffset, uint32_t u32Len, eTransMode TransMode, uint32_t u32MaxDelay, uint32_t u32CycleTime, ADS::HANDLE &Handle)
+uint32_t ADS::Ads::AddDeviceNotification(int32_t u32IdxGrp, uint32_t u32IdxOffset, uint32_t u32Len, eTransMode TransMode, uint32_t u32MaxDelay, uint32_t u32CycleTime, void (*Callback)(void*, size_t))
 {
     sADS_REQ_ADD_NOTIFICATION_t AddNoti;
-    sADS_RESP_READ_t ReadResponse;
-    uint32_t u32AdsRetVal;
+    sADS_RESP_WRITE_DEV_NOTI_t  Response;
+    //sADS_RESP_READ_t RdResponse;
+
+    sCallback_t* pCallback = this->GetHandle();
+    if( pCallback == nullptr )
+        return ADSERR_DEVICE_NOTIFYHNDINVALID;
 
     AddNoti.u32Length     = u32Len;
     AddNoti.u32TransMode  = TransMode;
     AddNoti.u32MaxDelay   = u32MaxDelay;
     AddNoti.u32CycleTime  = u32CycleTime;
 
-    this->ReadWrite(u32IdxGrp, u32IdxOffset, sizeof(ADS::HANDLE), sizeof(AddNoti), (void*)&AddNoti, &ReadResponse);
-    u32AdsRetVal = ReadResponse.u32Result;
-    memcpy(&Handle, ReadResponse.Data, sizeof(ADS::HANDLE));
+    this->Write(u32IdxGrp, u32IdxOffset, sizeof(AddNoti), (void*)&AddNoti, sizeof(sADS_RESP_WRITE_DEV_NOTI_t), &Response);
 
-    return u32AdsRetVal;
+    // Store handle and corresponding function pointer for callback
+    // handle is held in the length field
+    memcpy(&pCallback->Handle, &Response.u32NotificationHandle, sizeof(ADS::HANDLE));
+    pCallback->pCallback = Callback;
+
+    return Response.u32Result;
 }
 
 // completely untested!!!

@@ -51,6 +51,12 @@ typedef struct  __attribute__((__packed__))
    uint8_t  Data[ADS_MAX_DATA_SIZE];
 }sADS_RESP_READ_t;
 
+typedef struct  __attribute__((__packed__)) 
+{
+   uint32_t u32Result;
+   uint32_t u32NotificationHandle; // Only used in "AddDeviceNotification"
+}sADS_RESP_WRITE_DEV_NOTI_t;
+
 #define sADS_RESP_RW_t sADS_RESP_READ_t
 
 typedef struct  __attribute__((__packed__)) 
@@ -81,13 +87,14 @@ typedef struct __attribute__((__packed__))
    uint32_t          u32ErrorCode;
    uint32_t          u32InvokeId;
    union{
-     sADS_REQ_READ_WRITE_t   ReadWriteRequest;
-     sADS_REQ_READ_t         ReadRequest;
-     sADS_REQ_WRITE_t        WriteRequest;
-     sADS_RESP_READ_t        ReadResponse;
-     sADS_RESP_RW_t          ReadWriteResponse;
-     sADS_RESP_DEVICE_INFO_t DevInfoResponse;
-     uint32_t                u32WrResponse;
+     sADS_REQ_READ_WRITE_t      ReadWriteRequest;
+     sADS_REQ_READ_t            ReadRequest;
+     sADS_REQ_WRITE_t           WriteRequest;
+     sADS_RESP_READ_t           ReadResponse;
+     sADS_RESP_RW_t             ReadWriteResponse;
+     sADS_RESP_DEVICE_INFO_t    DevInfoResponse;
+     sADS_RESP_WRITE_DEV_NOTI_t WriteAddDevNotiResponse;
+     uint32_t                   u32Result;
    };
 }sAMS_PACKET_t;
 
